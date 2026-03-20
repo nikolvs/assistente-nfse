@@ -14,9 +14,8 @@ export default defineConfig({
     ...(process.env.WXT_START_URL ? { startUrls: [process.env.WXT_START_URL] } : {}),
   },
   manifest: {
-    name: 'Assistente NFS-e',
+    name: process.env.VITE_APP_NAME ?? 'Assistente NFS-e',
     description: 'Totaliza os valores das notas fiscais emitidas no portal nfse.gov.br',
-    version: '1.0.0',
     permissions: ['tabs'],
   },
   vite: () => ({

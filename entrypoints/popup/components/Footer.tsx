@@ -1,6 +1,8 @@
+const version = browser.runtime.getManifest().version;
+
 export default function Footer() {
   return (
-    <footer className="px-4 py-1 text-center">
+    <footer className="px-4 py-1 flex items-center justify-between">
       <span className="text-[10px] text-gray-300">
         Desenvolvido por{' '}
         <a
@@ -12,6 +14,7 @@ export default function Footer() {
           nkls.dev
         </a>
       </span>
+      <span className="text-[10px] text-gray-300">v{version}</span>
     </footer>
   );
 }
