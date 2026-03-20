@@ -11,6 +11,18 @@ import SummingSection from './components/SummingSection';
 import DoneSection from './components/DoneSection';
 import ErrorSection from './components/ErrorSection';
 
+async function getPageInfo(tabId: number, retries = 5, delay = 200): Promise<PageInfo> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await browser.tabs.sendMessage(tabId, { type: 'GET_PAGE_INFO' });
+    } catch {
+      if (i < retries - 1) await new Promise((r) => setTimeout(r, delay));
+      else throw new Error('Content script unavailable');
+    }
+  }
+  throw new Error('Content script unavailable');
+}
+
 export default function App() {
   const [state, setState] = useState<AppState>({ phase: 'loading' });
   const tabIdRef = useRef<number | null>(null);
@@ -28,9 +40,7 @@ export default function App() {
         }
 
         try {
-          const response = await browser.tabs.sendMessage(tabIdRef.current, {
-            type: 'GET_PAGE_INFO',
-          });
+          const response = await getPageInfo(tabIdRef.current);
           setState({ phase: 'ready', info: response });
         } catch {
           const isFileUrl = (tab.url?.startsWith('file://') ?? false) && import.meta.env.DEV;
