@@ -1,6 +1,6 @@
 # Assistente NFS-e
 
-Extensão de navegador que totaliza os valores das notas fiscais emitidas no [Portal NFS-e](https://www.nfse.gov.br/EmissorNacional/Notas/Emitidas), com suporte a múltiplas páginas e filtros.
+Extensão de navegador que totaliza os valores das notas fiscais emitidas no [Portal NFS-e](https://www.nfse.gov.br/EmissorNacional/Notas/Emitidas).
 
 ## Instalação
 
