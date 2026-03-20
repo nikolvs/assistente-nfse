@@ -1,7 +1,7 @@
 export default defineContentScript({
   matches: [
     'https://www.nfse.gov.br/EmissorNacional/Notas/Emitidas*',
-    'file://*/*',
+    ...(import.meta.env.DEV ? ['file://*/*'] : []),
   ],
   main() {
     function parseBRL(text: string): number {
