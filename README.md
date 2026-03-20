@@ -51,14 +51,10 @@ npm install
 
 ### Variáveis de ambiente
 
-Crie um arquivo `.env.local` na raiz do projeto com base no `.env.example`:
+Copie o arquivo de exemplo e ajuste conforme necessário:
 
-```env
-# Caminho para o binário do navegador (opcional, padrão: Google Chrome)
-WXT_CHROME_BINARY=/opt/brave.com/brave/brave
-
-# URL aberta automaticamente ao iniciar o dev server (opcional)
-WXT_START_URL=https://www.nfse.gov.br/EmissorNacional/Notas/Emitidas
+```bash
+cp .env.example .env.local
 ```
 
 ### Comandos
