@@ -16,7 +16,7 @@ export default function Button({ variant = 'ghost', onClick, children, className
   return (
     <button
       onClick={onClick}
-      className={`w-full cursor-pointer transition-colors ${styles[variant]} ${className ?? ''}`}
+      className={`w-full flex justify-center items-center gap-1 cursor-pointer leading-none transition-colors ${styles[variant]} ${className ?? ''}`}
     >
       {children}
     </button>

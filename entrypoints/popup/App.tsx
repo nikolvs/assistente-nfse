@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import LoadingView from './components/LoadingView';
 import FileAccessView from './components/FileAccessView';
+import SiteAccessView from './components/SiteAccessView';
 import UnsupportedView from './components/UnsupportedView';
 import CurrentPageSection from './components/CurrentPageSection';
 import ReadySection from './components/ReadySection';
@@ -11,10 +12,17 @@ import SummingSection from './components/SummingSection';
 import DoneSection from './components/DoneSection';
 import ErrorSection from './components/ErrorSection';
 
-async function getPageInfo(tabId: number, retries = 5, delay = 200): Promise<PageInfo> {
+function sendMessageWithTimeout(tabId: number, message: unknown, ms = 1000): Promise<PageInfo> {
+  return Promise.race([
+    browser.tabs.sendMessage(tabId, message) as Promise<PageInfo>,
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+  ]);
+}
+
+async function getPageInfo(tabId: number, retries = 5, delay = 400): Promise<PageInfo> {
   for (let i = 0; i < retries; i++) {
     try {
-      return await browser.tabs.sendMessage(tabId, { type: 'GET_PAGE_INFO' });
+      return await sendMessageWithTimeout(tabId, { type: 'GET_PAGE_INFO' });
     } catch {
       if (i < retries - 1) await new Promise((r) => setTimeout(r, delay));
       else throw new Error('Content script unavailable');
@@ -28,29 +36,36 @@ export default function App() {
   const tabIdRef = useRef<number | null>(null);
   const portRef = useRef<ReturnType<typeof browser.tabs.connect> | null>(null);
 
-  useEffect(() => {
-    async function init() {
-      try {
-        const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-        tabIdRef.current = tab?.id ?? null;
+  async function init() {
+    setState({ phase: 'loading' });
+    try {
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      tabIdRef.current = tab?.id ?? null;
 
-        if (!tabIdRef.current) {
-          setState({ phase: 'unsupported' });
-          return;
-        }
-
-        try {
-          const response = await getPageInfo(tabIdRef.current);
-          setState({ phase: 'ready', info: response });
-        } catch {
-          const isFileUrl = (tab.url?.startsWith('file://') ?? false) && import.meta.env.DEV;
-          setState({ phase: isFileUrl ? 'file-access-needed' : 'unsupported' });
-        }
-      } catch {
+      if (!tabIdRef.current) {
         setState({ phase: 'unsupported' });
+        return;
       }
-    }
 
+      try {
+        const response = await getPageInfo(tabIdRef.current);
+        setState({ phase: 'ready', info: response });
+      } catch (err) {
+          const url = tab.url ?? '';
+          if (url.startsWith('file://') && import.meta.env.DEV) {
+            setState({ phase: 'file-access-needed' });
+          } else if (url.includes('nfse.gov.br/EmissorNacional/Notas/Emitidas')) {
+            setState({ phase: 'site-access-needed' });
+          } else {
+            setState({ phase: 'unsupported' });
+          }
+      }
+    } catch {
+      setState({ phase: 'unsupported' });
+    }
+  }
+
+  useEffect(() => {
     init();
     return () => {
       portRef.current?.disconnect();
@@ -118,45 +133,52 @@ export default function App() {
     }));
   }
 
-  if (state.phase === 'loading') return <LoadingView />;
-  if (state.phase === 'file-access-needed') return <FileAccessView />;
-  if (state.phase === 'unsupported') return <UnsupportedView />;
-
-  const info = (state as Extract<AppState, { info: PageInfo }>).info;
+  const info = state.phase !== 'loading' && state.phase !== 'file-access-needed' && state.phase !== 'site-access-needed' && state.phase !== 'unsupported'
+    ? (state as Extract<AppState, { info: PageInfo }>).info
+    : null;
 
   return (
     <div className="w-full border-x border-y-2 border-black">
       <Header />
 
       <div className="px-4 pt-3.5 flex flex-col gap-3">
-        <CurrentPageSection info={info} />
+        {state.phase === 'loading' && <LoadingView />}
+        {state.phase === 'file-access-needed' && <FileAccessView />}
+        {state.phase === 'site-access-needed' && <SiteAccessView />}
+        {state.phase === 'unsupported' && <UnsupportedView />}
 
-        <div className="h-px bg-gray-100" />
+        {info && (
+          <>
+            <CurrentPageSection info={info} />
 
-        {state.phase === 'ready' && (
-          <ReadySection totalPages={info.totalPages} onSumAll={handleSumAll} />
-        )}
+            <div className="h-px bg-gray-100" />
 
-        {state.phase === 'summing' && (
-          <SummingSection
-            current={state.current}
-            total={state.total}
-            accumulated={state.accumulated}
-            onCancel={handleCancel}
-          />
-        )}
+            {state.phase === 'ready' && (
+              <ReadySection totalPages={info.totalPages} onSumAll={handleSumAll} />
+            )}
 
-        {state.phase === 'done' && (
-          <DoneSection
-            grandTotal={state.grandTotal}
-            grandCount={state.grandCount}
-            pages={state.pages}
-            onReset={handleReset}
-          />
-        )}
+            {state.phase === 'summing' && (
+              <SummingSection
+                current={state.current}
+                total={state.total}
+                accumulated={state.accumulated}
+                onCancel={handleCancel}
+              />
+            )}
 
-        {state.phase === 'error' && (
-          <ErrorSection message={state.message} onReset={handleReset} />
+            {state.phase === 'done' && (
+              <DoneSection
+                grandTotal={state.grandTotal}
+                grandCount={state.grandCount}
+                pages={state.pages}
+                onReset={handleReset}
+              />
+            )}
+
+            {state.phase === 'error' && (
+              <ErrorSection message={state.message} onReset={handleReset} />
+            )}
+          </>
         )}
       </div>
 

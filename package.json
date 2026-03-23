@@ -2,7 +2,7 @@
   "name": "assistente-nfse",
   "description": "Totaliza os valores das notas fiscais emitidas no portal nfse.gov.br",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -15,6 +15,7 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },

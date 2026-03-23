@@ -45,7 +45,6 @@ export default defineContentScript({
         const pageSum = sumValuesFromDoc(document);
         const totalPages = countPagesFromDoc(document);
         sendResponse({ ...pageSum, totalPages });
-        return true;
       }
     });
 

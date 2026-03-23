@@ -17,11 +17,9 @@ export default function CurrentPageSection({ info }: Props) {
         <span className="text-xs text-gray-400">
           {info.count} nota{info.count !== 1 ? 's' : ''}
         </span>
-        {info.totalPages > 1 && (
-          <span className="text-[10px] font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-            {info.totalPages} páginas
-          </span>
-        )}
+        <span className="text-[10px] font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+          {info.totalPages} página{info.totalPages !== 1 ? 's' : ''}
+        </span>
       </div>
     </div>
   );

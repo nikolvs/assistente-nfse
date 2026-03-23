@@ -1,6 +1,6 @@
 # Assistente NFS-e
 
-Extensão de navegador que totaliza os valores das notas fiscais emitidas no [Portal NFS-e](https://www.nfse.gov.br/EmissorNacional/Notas/Emitidas).
+Extensão de navegador que totaliza os valores das notas fiscais emitidas no <a href="https://www.nfse.gov.br/EmissorNacional/Notas/Emitidas" target="_blank">Portal NFS-e</a>.
 
 ## Instalação
 
@@ -69,4 +69,3 @@ npm run build
 # Gera os arquivos .zip prontos para publicação nas stores
 npm run zip
 ```
-
